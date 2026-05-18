@@ -48,10 +48,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .ex-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
 .ex-name{font-size:16px;font-weight:600;}
 .ex-meta{font-size:12px;color:var(--text2);margin-top:3px;}
-.set-row{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 36px;gap:5px;align-items:center;margin-bottom:8px;font-size:13px;}
+.set-row{display:grid;grid-template-columns:24px 44px 36px 36px 1fr 36px;gap:5px;align-items:center;margin-bottom:8px;font-size:13px;}
 .set-num{color:var(--text3);font-weight:600;text-align:center;}
 .set-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:4px;}
-.set-headers{display:grid;grid-template-columns:24px 1fr 1fr 1fr 1fr 36px;gap:5px;margin-bottom:4px;}
+.set-headers{display:grid;grid-template-columns:24px 44px 36px 36px 1fr 36px;gap:5px;margin-bottom:4px;}
 .set-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:8px 6px;text-align:center;width:100%;}
 .set-input.ai-prefilled{border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.08);}
 .set-input.note-area{resize:none;overflow:hidden;min-height:34px;line-height:1.4;padding-top:7px;padding-bottom:7px;}
@@ -85,25 +85,7 @@ canvas{display:block;}
 .clock-time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--text);}
 .clock-label{font-size:11px;color:var(--text3);margin-top:1px;}
 .duration-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(74,222,128,.12);color:var(--green);}
-/* REST TIMER */
-.timer-ring-wrap{position:relative;width:220px;height:220px;margin-bottom:28px;}
-.timer-ring-svg{transform:rotate(-90deg);}
-.timer-ring-bg{fill:none;stroke:var(--border);stroke-width:10;}
-.timer-ring-prog{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s;}
-.timer-ring-prog.urgent{stroke:var(--amber);}
-.timer-ring-prog.done{stroke:var(--green);}
-.timer-display{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.timer-time{font-size:56px;font-weight:800;letter-spacing:-2px;color:var(--text);font-variant-numeric:tabular-nums;}
-.timer-label{font-size:13px;color:var(--text2);margin-top:4px;}
-.timer-ex-info{font-size:14px;color:var(--text2);margin-bottom:28px;text-align:center;line-height:1.5;}
-.timer-ex-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.timer-btn-row{display:flex;gap:12px;}
-.timer-btn{padding:14px 28px;border-radius:50px;border:none;font-size:16px;font-weight:600;cursor:pointer;}
-.timer-btn-skip{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
-.timer-btn-stop{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3);}
-.timer-btn-add{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:14px 18px;}
-.timer-complete{font-size:15px;font-weight:600;color:var(--green);margin-top:16px;opacity:0;transition:opacity .3s;}
-.timer-complete.visible{opacity:1;}
+/* REST TIMER BAR */
 .rest-btn{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:8px;color:var(--accent);font-size:18px;padding:6px 10px;cursor:pointer;line-height:1;flex-shrink:0;transition:background .15s;}
 .rest-btn:active{background:rgba(108,99,255,.3);}
 /* WARMUP SETS */
@@ -378,26 +360,24 @@ canvas{display:block;}
     </div>
   </div>
 
-  <!-- REST TIMER OVERLAY -->
-  <div id="timerOverlay" class="timer-overlay hidden" onclick="handleOverlayClick(event)" style="flex-direction:column;align-items:center;justify-content:center">
-    <div class="timer-ex-name" id="timerExName"></div>
-    <div class="timer-ex-info" id="timerExInfo"></div>
-    <div class="timer-ring-wrap">
-      <svg class="timer-ring-svg" width="220" height="220" viewBox="0 0 220 220">
-        <circle class="timer-ring-bg" cx="110" cy="110" r="100"/>
-        <circle class="timer-ring-prog" id="timerRingProg" cx="110" cy="110" r="100"/>
-      </svg>
-      <div class="timer-display">
-        <div class="timer-time" id="timerDisplay">2:00</div>
-        <div class="timer-label" id="timerSubLabel">rest</div>
+  <!-- REST TIMER BAR (bottom, non-blocking) -->
+  <div id="timerBar" class="hidden" style="position:fixed;bottom:60px;left:0;right:0;z-index:150;padding:0 12px 6px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 20px rgba(0,0,0,.4)">
+      <div style="position:relative;width:42px;height:42px;flex-shrink:0">
+        <svg width="42" height="42" viewBox="0 0 42 42" style="transform:rotate(-90deg)">
+          <circle cx="21" cy="21" r="18" fill="none" stroke="var(--border)" stroke-width="4"/>
+          <circle id="timerBarProg" cx="21" cy="21" r="18" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text)" id="timerBarSecs"></div>
       </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="timerBarLabel">Rest</div>
+        <div style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);line-height:1" id="timerDisplay">2:00</div>
+      </div>
+      <button onclick="addTime(30)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;padding:6px 8px;cursor:pointer;white-space:nowrap">+30s</button>
+      <button onclick="skipTimer()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;padding:6px 10px;cursor:pointer">Skip</button>
+      <button onclick="stopTimer()" style="background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:8px;color:var(--red);font-size:14px;font-weight:600;padding:6px 10px;cursor:pointer">&#x2715;</button>
     </div>
-    <div class="timer-btn-row">
-      <button class="timer-btn timer-btn-add" onclick="addTime(30)">+30s</button>
-      <button class="timer-btn timer-btn-skip" onclick="skipTimer()">Skip</button>
-      <button class="timer-btn timer-btn-stop" onclick="stopTimer()">&#x2715;</button>
-    </div>
-    <div class="timer-complete" id="timerComplete">&#x2713; Rest complete &#x2014; next set!</div>
   </div>
 
   <nav class="bottom-nav">
@@ -418,8 +398,7 @@ const RPE_OPTIONS=['<5','5','5.5','6','6.5','7','7.5','8','8.5','9','9.5','10'];
 const warmupCounts={}, warmupPrefills={};
 let swapTargetIdx=null, swapSelectedName=null;
 let workoutStartTime=null, clockInterval=null;
-let timerInterval=null, timerSecondsLeft=0, timerTotalSeconds=0, timerDone=false;
-const CIRCUMFERENCE=2*Math.PI*100;
+let timerInterval=null;
 
 // INIT
 window.onload=()=>{
@@ -640,12 +619,15 @@ function buildSetRow(ex,exIdx,s,prevSets){
   const rpeOpts=RPE_OPTIONS.map(r=>'<option value="'+r+'" '+(r===ex.targetRpe?'selected':'')+'>'+r+'</option>').join('');
   const restSec=parseInt(ex.rest)||90;
   const exSafe=ex.exercise.replace(/'/g,"\\'");
+  const prevLoadNum=prev.load?String(prev.load).replace(/[^0-9.]/g,''):'';
+  const prescLoadNum=ex.load?String(ex.load).replace(/[^0-9.]/g,''):'';
+  const loadPlaceholder=prevLoadNum||prescLoadNum||'0';
   return '<div class="set-row" id="setrow_'+exIdx+'_'+s+'">'
     +'<div class="set-num">'+s+'</div>'
-    +'<input class="set-input ai-prefilled" type="text" placeholder="'+(prev.load||ex.load||'\u2014')+'" id="load_'+exIdx+'_'+s+'" value="'+(prev.load||'')+'">'
-    +'<input class="set-input" type="number" placeholder="'+ex.reps+'" id="reps_'+exIdx+'_'+s+'">'
-    +'<select class="set-input" id="rpe_'+exIdx+'_'+s+'">'+rpeOpts+'</select>'
-    +'<textarea class="set-input note-area" placeholder="note\u2026" id="note_'+exIdx+'_'+s+'" rows="1" oninput="autoExpand(this)"></textarea>'
+    +'<input class="set-input ai-prefilled" type="number" inputmode="decimal" placeholder="'+loadPlaceholder+'" id="load_'+exIdx+'_'+s+'" value="'+prevLoadNum+'" style="font-size:13px;padding:8px 3px;text-align:center">'
+    +'<input class="set-input" type="number" inputmode="numeric" placeholder="\u2014" id="reps_'+exIdx+'_'+s+'" style="font-size:13px;padding:8px 3px;text-align:center">'
+    +'<select class="set-input" id="rpe_'+exIdx+'_'+s+'" style="font-size:11px;padding:8px 2px;background-position:right 2px center;padding-right:14px">'+rpeOpts+'</select>'
+    +'<textarea class="set-input note-area" placeholder="note\u2026" id="note_'+exIdx+'_'+s+'" rows="1" oninput="autoExpand(this)" style="text-align:left;font-size:13px"></textarea>'
     +'<button class="rest-btn" onclick="startTimer('+restSec+',\''+exSafe+'\','+s+','+ex.sets+')" title="Start rest timer">&#9201;</button>'
     +'</div>';
 }
@@ -903,43 +885,101 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 // AUTO-EXPAND NOTES
 function autoExpand(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 
-// REST TIMER
+// REST TIMER — uses absolute end timestamp so it stays accurate when screen sleeps/app backgrounds
+// The Web Audio API beep is scheduled ahead of time so it fires even if the screen is off.
+let timerEndTime=null;   // absolute ms timestamp when rest ends
+let timerTotalMs=0;
+let timerExerciseName='';
+let timerDone=false;
+
+const BAR_CIRCUMFERENCE=2*Math.PI*18; // r=18 in the small SVG
+
 function startTimer(restSeconds,exerciseName,setNum,totalSets){
-  clearInterval(timerInterval);timerDone=false;timerSecondsLeft=restSeconds;timerTotalSeconds=restSeconds;
-  const prog=document.getElementById('timerRingProg');prog.style.strokeDasharray=CIRCUMFERENCE;prog.classList.remove('urgent','done');
-  document.getElementById('timerExName').textContent=exerciseName;
-  document.getElementById('timerExInfo').textContent='Set '+setNum+' of '+totalSets+' complete';
-  document.getElementById('timerComplete').classList.remove('visible');
-  document.getElementById('timerSubLabel').textContent='rest';
-  document.getElementById('timerOverlay').classList.remove('hidden');
-  updateTimerDisplay();
-  timerInterval=setInterval(()=>{timerSecondsLeft--;updateTimerDisplay();if(timerSecondsLeft<=0){clearInterval(timerInterval);timerDone=true;onTimerComplete();}},1000);
+  clearInterval(timerInterval);
+  timerDone=false;
+  timerEndTime=Date.now()+(restSeconds*1000);
+  timerTotalMs=restSeconds*1000;
+  timerExerciseName=exerciseName;
+
+  document.getElementById('timerBarLabel').textContent=exerciseName+' · Set '+setNum+' of '+totalSets;
+  document.getElementById('timerBar').classList.remove('hidden');
+
+  // Schedule the beep via Web Audio ahead of time — fires even with screen off
+  scheduleBeep(restSeconds);
+
+  updateTimerBar();
+  timerInterval=setInterval(updateTimerBar,500);
 }
 
-function updateTimerDisplay(){
-  const mins=Math.floor(Math.max(timerSecondsLeft,0)/60);const secs=Math.max(timerSecondsLeft,0)%60;
-  document.getElementById('timerDisplay').textContent=mins+':'+String(secs).padStart(2,'0');
-  const prog=document.getElementById('timerRingProg');const ratio=timerTotalSeconds>0?timerSecondsLeft/timerTotalSeconds:0;
-  prog.style.strokeDashoffset=CIRCUMFERENCE*(1-ratio);prog.classList.remove('urgent','done');
-  if(timerSecondsLeft<=10&&timerSecondsLeft>0)prog.classList.add('urgent');
+function updateTimerBar(){
+  if(!timerEndTime)return;
+  const remaining=Math.max(0,timerEndTime-Date.now());
+  const secs=Math.ceil(remaining/1000);
+
+  // Time display
+  const m=Math.floor(secs/60);const s=secs%60;
+  document.getElementById('timerDisplay').textContent=m+':'+String(s).padStart(2,'0');
+  document.getElementById('timerBarSecs').textContent=secs>0?secs:'';
+
+  // Mini ring progress
+  const prog=document.getElementById('timerBarProg');
+  const ratio=timerTotalMs>0?remaining/timerTotalMs:0;
+  prog.style.strokeDasharray=BAR_CIRCUMFERENCE;
+  prog.style.strokeDashoffset=BAR_CIRCUMFERENCE*(1-ratio);
+  prog.style.stroke=secs<=10?'var(--amber)':'var(--accent)';
+
+  if(remaining<=0&&!timerDone){
+    timerDone=true;
+    clearInterval(timerInterval);
+    onTimerComplete();
+  }
 }
 
 function onTimerComplete(){
-  const prog=document.getElementById('timerRingProg');prog.classList.add('done');prog.style.strokeDashoffset=CIRCUMFERENCE;
-  document.getElementById('timerDisplay').textContent='0:00';document.getElementById('timerSubLabel').textContent='done!';
-  document.getElementById('timerComplete').classList.add('visible');
+  document.getElementById('timerDisplay').textContent='Done!';
+  document.getElementById('timerBarSecs').textContent='';
+  document.getElementById('timerBarProg').style.stroke='var(--green)';
+  document.getElementById('timerBarLabel').textContent=timerExerciseName+' · Rest complete ✓';
   if(navigator.vibrate)navigator.vibrate([200,100,200]);
-  playBeep();
-  setTimeout(()=>{if(timerDone)closeTimerOverlay();},3000);
+  // Auto-dismiss bar after 4s
+  setTimeout(()=>{if(timerDone)closeTimerOverlay();},4000);
 }
 
-function playBeep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const t=(f,s,d)=>{const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0.4,ctx.currentTime+s);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+s+d);o.start(ctx.currentTime+s);o.stop(ctx.currentTime+s+d+0.05);};t(880,0,0.15);t(880,0.2,0.15);t(1100,0.4,0.3);}catch(e){}}
+function scheduleBeep(seconds){
+  // Schedule beeps via Web Audio at the exact future time — works with screen off
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const beepAt=ctx.currentTime+seconds;
+    const tone=(freq,start,dur)=>{
+      const o=ctx.createOscillator();const g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq;o.type='sine';
+      g.gain.setValueAtTime(0.5,start);
+      g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+      o.start(start);o.stop(start+dur+0.05);
+    };
+    tone(880,beepAt,0.15);
+    tone(880,beepAt+0.2,0.15);
+    tone(1100,beepAt+0.4,0.3);
+  }catch(e){}
+}
 
-function addTime(seconds){timerSecondsLeft+=seconds;timerTotalSeconds+=seconds;timerDone=false;document.getElementById('timerComplete').classList.remove('visible');document.getElementById('timerSubLabel').textContent='rest';const prog=document.getElementById('timerRingProg');prog.classList.remove('done','urgent');clearInterval(timerInterval);timerInterval=setInterval(()=>{timerSecondsLeft--;updateTimerDisplay();if(timerSecondsLeft<=0){clearInterval(timerInterval);timerDone=true;onTimerComplete();}},1000);updateTimerDisplay();}
+function addTime(seconds){
+  if(!timerEndTime)return;
+  timerEndTime+=seconds*1000;
+  timerTotalMs+=seconds*1000;
+  timerDone=false;
+  document.getElementById('timerBarProg').style.stroke='var(--accent)';
+  // Re-schedule beep for new end time
+  const remaining=Math.max(0,(timerEndTime-Date.now())/1000);
+  scheduleBeep(remaining);
+  updateTimerBar();
+}
+
 function skipTimer(){clearInterval(timerInterval);timerDone=true;closeTimerOverlay();}
-function stopTimer(){clearInterval(timerInterval);timerInterval=null;closeTimerOverlay();}
-function closeTimerOverlay(){document.getElementById('timerOverlay').classList.add('hidden');timerDone=false;}
-function handleOverlayClick(e){if(e.target===document.getElementById('timerOverlay'))stopTimer();}
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;timerEndTime=null;closeTimerOverlay();}
+function closeTimerOverlay(){document.getElementById('timerBar').classList.add('hidden');timerDone=false;}
+function handleOverlayClick(e){}  // no-op, bar has its own close buttons
 
 
 // ═══════════════════════════════════════════════════════
@@ -1049,7 +1089,7 @@ function buildExerciseBlockHTML(ex,exIdx,prevSets){
     +(prevSets.length?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Last session: '+prevSets[0].load+' × '+prevSets[0].reps+' reps @ RPE '+prevSets[0].rpe+'</div>':'')
     +'<div class="warmup-section" id="warmups_'+exIdx+'"></div>'
     +'<div class="working-divider" id="workingDivider_'+exIdx+'" style="display:none"><div class="working-divider-line"></div><div class="working-divider-label">Working sets</div><div class="working-divider-line"></div></div>'
-    +'<div class="set-headers"><div></div><div class="set-label">Load</div><div class="set-label">Reps done</div><div class="set-label">RPE</div><div class="set-label">Notes</div><div class="set-label">&#9201;</div></div>'
+    +'<div class="set-headers"><div></div><div class="set-label">Load</div><div class="set-label">Reps</div><div class="set-label">RPE</div><div class="set-label">Notes</div><div class="set-label">&#9201;</div></div>'
     +'<div id="setrows_'+exIdx+'">'+buildSetRows(ex,exIdx,prevSets)+'</div>'
     +'<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'
     +'<button class="btn btn-secondary btn-sm" onclick="addWarmup('+exIdx+')" style="flex:1;font-size:12px;padding:7px;color:var(--amber);border-color:rgba(251,191,36,.4)">+ Warmup</button>'
