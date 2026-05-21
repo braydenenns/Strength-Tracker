@@ -543,7 +543,16 @@ function loadRememberedRpe(){
 }
 
 // ── SESSION SELECTOR ──
-function getCompletedSessionKeys(){const keys=new Set();log.forEach(r=>keys.add(r.week+'::'+r.day+'::'+r.session));return keys;}
+function getCompletedSessionKeys(){
+  const keys=new Set();
+  log.forEach(r=>{
+    // Only count as done if it has real data (load or reps logged)
+    if((r.load&&String(r.load).trim())||( r.reps&&String(r.reps).trim())){
+      keys.add(r.week+'::'+r.day+'::'+r.session);
+    }
+  });
+  return keys;
+}
 function getNextSession(){
   const done=getCompletedSessionKeys();const seen=new Set();
   for(const r of program){const key=r.week+'::'+r.day+'::'+r.session;if(!seen.has(key)){seen.add(key);if(!done.has(key))return key;}}
@@ -869,12 +878,15 @@ async function readLogFromSheet(){
     if(data.status!=='ok'){showToast('Script error: '+(data.message||'unknown'));return;}
     const rows=data.rows||[];
     if(!rows.length){showToast('Sheet log is empty — use Push to upload local data');return;}
-    const sheetKeys=new Set(rows.map(r=>r.date+'::'+r.session+'::'+r.exercise+'::'+String(r.set)));
-    const localOnly=log.filter(r=>!sheetKeys.has(r.date+'::'+r.session+'::'+r.exercise+'::'+String(r.set)));
-    log=[...rows,...localOnly].sort((a,b)=>a.date.localeCompare(b.date));
+    // Deduplicate by date::session::exercise::set — sheet is source of truth
+    const seen=new Set();
+    const deduped=rows.filter(r=>{
+      const k=r.date+'::'+r.session+'::'+r.exercise+'::'+String(r.set);
+      if(seen.has(k))return false;seen.add(k);return true;
+    });
+    log=deduped.sort((a,b)=>a.date.localeCompare(b.date));
     localStorage.setItem('st_log',JSON.stringify(log));
     populateProgressExercises();renderRecentSessions();
-    if(localOnly.length>0)await writeToSheet(localOnly);
     showToast('Synced — '+log.length+' entries');
   }catch(e){showToast('Unexpected error — check Script URL');}
 }
