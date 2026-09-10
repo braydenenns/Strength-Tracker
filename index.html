@@ -499,7 +499,7 @@ function loadDemo(){
 }
 async function reloadSheet(){
   if(!settings.sheetUrl){showToast('No sheet URL saved');return;}
-  await fetchProgram(settings.sheetUrl);showToast('Program reloaded!');
+  await fetchProgram(settings.sheetUrl);populateSessions();showToast('Program reloaded!');
 }
 async function fetchProgram(url){
   try{
@@ -508,6 +508,7 @@ async function fetchProgram(url){
     const rows=text.trim().split('\\n').slice(1);
     program=rows.map(r=>{const cols=r.split(',').map(c=>c.replace(/^"|"$/g,'').trim());return{week:parseInt(cols[0])||1,day:parseInt(cols[1])||1,session:cols[2]||'',exercise:cols[3]||'',category:cols[4]||'',sets:parseInt(cols[5])||3,reps:cols[6]||'8',load:cols[7]||'',targetRpe:cols[8]||'7',rest:cols[9]||'90',tempo:cols[10]||'',notes:cols[11]||''}}).filter(r=>r.exercise);
     localStorage.setItem('st_program',JSON.stringify(program));
+    populateSessions();
     try{
       const libUrl=csvUrl.replace(/gid=\\d+/,'').replace(/&+$/,'')+'&gid=1';
       const libRes=await fetch(libUrl);const libText=await libRes.text();
@@ -888,7 +889,7 @@ async function readLogFromSheet(){
     });
     log=deduped.sort((a,b)=>a.date.localeCompare(b.date));
     localStorage.setItem('st_log',JSON.stringify(log));
-    populateProgressExercises();renderRecentSessions();
+    populateSessions();populateProgressExercises();renderRecentSessions();
     showToast('Synced — '+log.length+' entries');
   }catch(e){showToast('Unexpected error — check Script URL');}
 }
