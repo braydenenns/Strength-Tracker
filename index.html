@@ -505,7 +505,7 @@ async function fetchProgram(url){
   try{
     const csvUrl=url.includes('output=csv')?url:url+'&output=csv';
     const res=await fetch(csvUrl);const text=await res.text();
-    const rows=text.trim().split('\n').slice(1);
+    const rows=text.trim().split('\n').slice(3).filter(r=>r.trim());
     program=rows.map(r=>{const cols=r.split(',').map(c=>c.replace(/^"|"$/g,'').trim());return{week:parseInt(cols[0])||1,day:parseInt(cols[1])||1,session:cols[2]||'',exercise:cols[3]||'',category:cols[4]||'',sets:parseInt(cols[5])||3,reps:cols[6]||'8',load:cols[7]||'',targetRpe:cols[8]||'7',rest:cols[9]||'90',tempo:cols[10]||'',notes:cols[11]||''}}).filter(r=>r.exercise);
     localStorage.setItem('st_program',JSON.stringify(program));
     populateSessions();
