@@ -505,14 +505,14 @@ async function fetchProgram(url){
   try{
     const csvUrl=url.includes('output=csv')?url:url+'&output=csv';
     const res=await fetch(csvUrl);const text=await res.text();
-    const rows=text.trim().split('\\n').slice(1);
+    const rows=text.trim().split('\n').slice(1);
     program=rows.map(r=>{const cols=r.split(',').map(c=>c.replace(/^"|"$/g,'').trim());return{week:parseInt(cols[0])||1,day:parseInt(cols[1])||1,session:cols[2]||'',exercise:cols[3]||'',category:cols[4]||'',sets:parseInt(cols[5])||3,reps:cols[6]||'8',load:cols[7]||'',targetRpe:cols[8]||'7',rest:cols[9]||'90',tempo:cols[10]||'',notes:cols[11]||''}}).filter(r=>r.exercise);
     localStorage.setItem('st_program',JSON.stringify(program));
     populateSessions();
     try{
       const libUrl=csvUrl.replace(/gid=\\d+/,'').replace(/&+$/,'')+'&gid=1';
       const libRes=await fetch(libUrl);const libText=await libRes.text();
-      const libRows=libText.trim().split('\\n').slice(1);
+      const libRows=libText.trim().split('\n').slice(1);
       exerciseLibrary=libRows.map(r=>r.split(',').map(c=>c.replace(/^"|"$/g,'').trim())).filter(cols=>cols[0]).map(cols=>({name:cols[0],category:cols[1]||'',muscle:cols[2]||'',notes:cols[3]||''}));
       localStorage.setItem('st_exerciseLibrary',JSON.stringify(exerciseLibrary));
     }catch(e){}
