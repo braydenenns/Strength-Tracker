@@ -880,7 +880,12 @@ async function readLogFromSheet(){
     let data;try{const text=await res.text();data=JSON.parse(text);}catch(e){showToast('Bad response — try re-deploying script');return;}
     if(data.status!=='ok'){showToast('Script error: '+(data.message||'unknown'));return;}
     const rows=data.rows||[];
-    if(!rows.length){showToast('Sheet log is empty — use Push to upload local data');return;}
+    if(!rows.length){
+      log=[];
+      localStorage.setItem('st_log',JSON.stringify(log));
+      populateSessions();populateProgressExercises();renderRecentSessions();
+      showToast('Log cleared — 0 entries');return;
+    }
     // Deduplicate by date::session::exercise::set — sheet is source of truth
     const seen=new Set();
     const deduped=rows.filter(r=>{
@@ -933,7 +938,7 @@ function renderRecentSessions(){
     return '<div class="hist-item sess-row" data-date="'+safeDate+'" data-sess="'+safeSess+'" style="cursor:pointer">'
       +'<div><div class="hist-main">'+s.session+'</div><div class="hist-sub">'+exList+'</div></div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">'
-      +'<div style="font-size:12px;color:var(--text2)">'+s.date+'</div>'
+      +'<div style="font-size:12px;color:var(--text2)">'+(()=>{const p=s.date.split('-');return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});})()+'</div>'
       +(durStr?'<div class="duration-badge">'+durStr+'</div>':'')
       +'<div style="color:var(--text3);font-size:16px">›</div></div></div>';
   }).join('');
