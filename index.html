@@ -547,8 +547,10 @@ function getCompletedSessionKeys(){
   const keys=new Set();
   log.forEach(r=>{
     // Only count as done if it has real data (load or reps logged)
-    if((r.load&&String(r.load).trim())||( r.reps&&String(r.reps).trim())){
-      keys.add(r.week+'::'+r.day+'::'+r.session);
+    const hasData=(r.load&&String(r.load).trim()&&r.load!=='0')||(r.reps&&String(r.reps).trim()&&r.reps!=='0');
+    // Must match exact week + day + session to mark complete
+    if(hasData&&r.week&&r.day&&r.session){
+      keys.add(String(r.week)+'::'+String(r.day)+'::'+r.session);
     }
   });
   return keys;
